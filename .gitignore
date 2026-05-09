@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+.env
+.envrc
+
+# Local runtime artifacts (in case anyone runs PKH outside Colab)
+chroma_db/
+pkh_chroma/
+manifest.json
+*.chroma/
+
+# Notebook scratch
+.ipynb_checkpoints/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Personal chat archives — templates in `chats teamplates/` are intentionally tracked.
+# Anything dropped into these folders stays local:
+chats/
+chats_local/
+ai_studio_dumps/
+
+# Secrets
+*.key
+*.pem
+.envrc.local

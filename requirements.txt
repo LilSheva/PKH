@@ -1,0 +1,5 @@
+chromadb>=0.5
+sentence-transformers>=3.0
+pydantic>=2
+numpy
+torch
