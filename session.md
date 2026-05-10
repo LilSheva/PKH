@@ -60,7 +60,7 @@
 8. **`system_instruction` в `generate_super_prompt`** — подмешивать SI чата к найденным блокам как контекст.
 9. **`pyproject.toml` + package layout** — вместе с CLI.
 
-### Roadmap (заморожено, не сейчас)
+### Tier 4 — Roadmap (после стабилизации ядра)
 - **PKH Radar** — UMAP + HDBSCAN визуализация кластеров.
 - **Persona Snapshot / Unfinished Business** — LLM-аналитика «над чем зависал», «что забросил».
 - **Serendipity Widget** — рандомизатор инсайтов на пересечении случайных тегов.

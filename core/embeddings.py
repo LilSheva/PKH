@@ -58,7 +58,7 @@ def get_model(key: str):
     return SentenceTransformer(spec.hf_name, device=device)
 
 
-def embed_passages(key: str, texts: list[str]) -> list[list[float]]:
+def embed_passages(key: str, texts: list[str], batch_size: int = 8) -> list[list[float]]:
     if not texts:
         return []
     spec = get_spec(key)
@@ -70,7 +70,7 @@ def embed_passages(key: str, texts: list[str]) -> list[list[float]]:
         normalize_embeddings=True,
         show_progress_bar=False,
         convert_to_numpy=True,
-        batch_size=32,
+        batch_size=batch_size,
     )
     return arr.tolist()
 

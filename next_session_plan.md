@@ -49,14 +49,31 @@ for path in tqdm(list(ingestion.iter_files(root)), desc="scanning"):
 4. Прогнать `tag_chats(gemini_call)` — убедиться, что теги адекватные.
 5. Если всё ок — прогнать на полном архиве.
 
-### 4. После успешного прогона — зеркалирование тегов
+### 4. Добавить harrier-oss-v1-0.6b в реестр моделей
+
+Microsoft `harrier-oss-v1-0.6b` — топ MMTEB в классе 0.6B, мультиязычная, MIT, sentence-transformers совместимая. Добавить запись в `core/embeddings.py`:
+
+```python
+"harrier": EmbedderSpec(
+    key="harrier",
+    hf_name="microsoft/harrier-oss-v1-0.6b",
+    dim=...,          # уточнить из карточки модели
+    max_seq_len=...,  # уточнить
+    query_prefix="",  # уточнить
+    passage_prefix="",
+),
+```
+
+После добавления — прогнать ингест с `config.EMBEDDING_MODEL = "harrier"` и сравнить качество поиска с bge-m3.
+
+### 5. Зеркалирование тегов в Chroma
 
 Добавить метод `ContextSniper.sync_tags_to_chroma()`:
 - Пройтись по `manifest.chat_paths()`.
 - Для каждого `chat_id` с непустыми `tags`/`topics` — обновить metadata всех блоков этого чата в Chroma через `collection.update(...)`.
 - После этого `search_context(query, where={"tags": {"$contains": "#siem"}})` заработает.
 
-### 5. CLI-обёртка (опционально, если есть время)
+### 6. CLI-обёртка (опционально, если есть время)
 
 `cli.py` с подкомандами: `ingest`, `tag`, `search`, `prompt`, `stats`. Использовать `argparse` (без лишних зависимостей). Зарегистрировать через `pyproject.toml` → `[project.scripts] pkh = "cli:main"`.
 
