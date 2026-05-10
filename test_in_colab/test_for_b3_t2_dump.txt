@@ -101,3 +101,143 @@ if found:
     print(f"⚠️  FAIL: Found thought markers in prompt: {found}")
 else:
     print("✓ PASS: No thought markers found in generated prompt")
+
+---
+
+ 
+======================================================================
+TEST 1
+main_prompt: Напиши шаблон ответа на инцидент с Kaspersky Endpoint Security.
+meta_query:  инцидент Kaspersky event_src.ip event_src.asset MaxPatrol SIEM
+======================================================================
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_auth.py:93: UserWarning: 
+The secret `HF_TOKEN` does not exist in your Colab secrets.
+To authenticate with the Hugging Face Hub, create a token in your settings tab (https://huggingface.co/settings/tokens), set it as secret in your Google Colab and restart your session.
+You will be able to reuse this secret in all of your notebooks.
+Please note that authentication is recommended but still optional to access public models or datasets.
+  warnings.warn(
+modules.json: 100% 349/349 [00:00<00:00, 30.0kB/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+config_sentence_transformers.json: 100% 123/123 [00:00<00:00, 13.6kB/s]README.md:  15.8k/? [00:00<00:00, 1.44MB/s]sentence_bert_config.json: 100% 54.0/54.0 [00:00<00:00, 6.30kB/s]config.json: 100% 687/687 [00:00<00:00, 61.9kB/s]pytorch_model.bin: 100% 2.27G/2.27G [00:22<00:00, 72.5MB/s]Loading weights: 100% 391/391 [00:00<00:00, 476.17it/s, Materializing param=pooler.dense.weight]model.safetensors: 100% 2.27G/2.27G [00:19<00:00, 129MB/s]tokenizer_config.json: 100% 444/444 [00:00<00:00, 10.9kB/s]sentencepiece.bpe.model: 100% 5.07M/5.07M [00:00<00:00, 25.3MB/s]tokenizer.json: 100% 17.1M/17.1M [00:00<00:00, 86.3MB/s]special_tokens_map.json: 100% 964/964 [00:00<00:00, 20.4kB/s]config.json: 100% 191/191 [00:00<00:00, 5.25kB/s]
+--- FULL PROMPT (first 1200 chars) ---
+## CONTEXT
+
+### Источник: Разница event_src.ip и event_src (блок 0, dist=0.300)
+USER: event_src.ip и event_src.asset в чем разница в siem mp 10 в контексте сработки с kaspersky endpoint_security ?
+
+MODEL: I'm currently focused on the intricacies of MaxPatrol SIEM v10. My priority is to understand the precise meaning and application of the `event_src.ip` and `event_src.asset` fields.  Furthermore, I will be delving into how Kaspersky Endpoint Security data integrates within this system.
+
+I'm now zeroing in on how `event_src.ip` and `event_src.asset` are populated during an event trigger within MaxPatrol SIEM v10. My focus has sharpened, aiming to precisely explain their distinction and significance, especially concerning Kaspersky Endpoint Security integrations. The goal is to provide a clear and actionable explanation.
+
+**Analyzing MaxPatrol SIEM Fields**
+
+I've been digging deeper into the specifics of MaxPatrol SIEM fields. My focus has been primarily on `event_src.ip` and `event_src.asset`. I've confirmed that `event_src.ip` is indeed an IP address type. Next, I plan to clarify the meaning of `event_src.asset`. I need to figure out how asset identification is performed.
+
+**Deciph
+
+
+======================================================================
+TEST 2
+main_prompt: Напиши функцию на Python для извлечения IPv4, доменов и MD5 из текста.
+meta_query:  regex IoC сигнатура парсинг индикаторов компрометации
+======================================================================
+
+--- FULL PROMPT (first 1200 chars) ---
+## CONTEXT
+
+### Источник: IoC Сигнатуры И Как Описать (блок 1, dist=0.333)
+USER: "парсер индикаторов компрометации (іос) по сигнатурному анализу с учетом структурных особенностей" вот так можно? Или структ особенности уже лишнее?
+
+MODEL: **Analyzing the Query's Focus**
+
+I'm currently dissecting the user's query, focusing on its core components. The key terms are "parser", "indicators of compromise (IOCs)", "signature analysis," and "structural features." I'm determining the relationships between these terms to understand the desired functionality and scope of the requested tool. This is laying the foundation for a relevant and accurate tool.
+
+**Refining the Phrasing**
+
+I'm now refining the proposed phrase, carefully balancing precision and clarity. My focus is on the Russian terminology, specifically. "Сигнатурный анализ" in the provided context felt clunky, so I've suggested "на основе сигнатур" or "с использованием регулярных выражений" for improved flow and natural language. I'm aiming for a phrase that is both technically sound and easily understood.
+
+**Clarifying the Ambiguity**
+
+I'm now grappling with the user's implicit doubts. I'm focusing on the term "structural features" 
+
+
+======================================================================
+TEST 3
+main_prompt: фарм ферма CS2 100 аккаунтов окупаемость затраты
+meta_query:  None
+======================================================================
+
+--- FULL PROMPT (first 1200 chars) ---
+## CONTEXT
+
+### Источник: Автоматизированные игровые фермы: Доход (блок 0, dist=0.300)
+USER: Я знаю что есть фарм фермы в кс2, где на условных 100 аккаунтах (либо специальной панелью, либо около ручным способом) выбивается еженедельный дроп, я посчитал и примерно ферма на 100 аккаунтов (с учётом покупки оптимального пк под нее) будет стоить 300-350к рублей. Так вот, сам вопрос в том какие ещё есть актуальные игры где можно автоматизированно фармить и при этом хорошо зарабатывать, давай составим топ 5 или 10 (в зависимости от того насколько их много) актуальных и самых прибыльных ферм, а также для каждой условно напиши минимальный и потенциальный доход в месяц, а также обязательные затраты на ее настройку в контексте данной игры (ибо прайс в КС2 платный)
+
+MODEL: **Analyzing the Farm's Setup**
+
+I'm currently focused on dissecting the user's setup, particularly the financial aspects. I've noted the estimated 300-350k Ruble cost for a 100-account farm and will investigate the breakdown to assess if assumptions are sound.
+
+**Investigating Alternative Games**
+
+I'm now shifting gears to identify alternative games suitable for automated farming, focusing on profitability and current releva
+
+
+======================================================================
+TEST 4
+main_prompt: Объясни разницу между Docker и Kubernetes.
+meta_query:  контейнеризация Docker Kubernetes оркестрация
+======================================================================
+
+--- FULL PROMPT (first 1200 chars) ---
+## CONTEXT
+
+_Релевантный контекст не найден (все результаты за порогом дистанции)._
+
+## TASK
+
+Объясни разницу между Docker и Kubernetes.
+
+
+======================================================================
+TEST 5
+main_prompt: Составь план A/B тестирования описаний товара на Wildberries.
+meta_query:  анализ продаж конкурентов Wildberries описание товара
+======================================================================
+
+--- FULL PROMPT (first 1200 chars) ---
+## CONTEXT
+
+### Источник: Branch of Стратегический анализ и план продаж "Дождика" на 2025-2026 (блок 3, dist=0.427)
+USER: Вот кусочек файла МОЙ - ШИП - серебристый, серебристо-белый 100г (290653606) - Wildberries - позиции по запросам (sku_ 290653606) 29.11.2024-28.02.2025 (15.10.2025).csv - "Поисковый запрос	Кластер WB	Частота Ozon	Частота WB	Частота кластера WB	Товаров по запросу	Ср. позиция	Ср. позиция в рекламе	Ср. органическая позиция	Позиция - 29.11.2024	Позиция - 30.11.2024	Позиция - 01.12.2024	Позиция - 02.12.2024	Позиция - 03.12.2024	Позиция - 04.12.2024	Позиция - 05.12.2024	Позиция - 06.12.2024	Позиция - 07.12.2024	Позиция - 08.12.2024
+дожд	дождь	11	295	25808	100058	243	174	274	490	446	325	233	230	276	251	241	425	432
+дожде	дождь	9	315	25808	100142	226	151	249	-	-	455	-	191	163	238	215	445	474
+серпатин	серпантин	3	225	5958	5041	242	161	275	-	-	-	-	128	289	20	-	-	-
+нг декор	декор на новый год	54	1725	446611	113733	126	126	-	-	-	-	-	-	-	-	-	-	-
+праздник	праздник	366	2265	13302	109104	336	336	-	-	-	-	-	-	-	-	-	-	-
+дожди	дождь	37	290	25808	100026	224	178	240	-	-	-	148	311	220	250	256	-	413
+држдик	дождь	0	235	25808	100105	208	197	213	-	-	-	174	281	184	246	-	495	-
+дождик	дождь	
+
+
+======================================================================
+TEST 6
+main_prompt: Напиши инструкцию по настройке Google Colab для анализа данных.
+meta_query:  Google Colab подключение Drive Python анализ файлов
+======================================================================
+
+✓ Saved to: /content/drive/MyDrive/pkh_chroma/prompts/2026-05-10_0223_напиши-инструкцию-по-настройке-google-co.md
+--- File content (first 1000 chars) ---
+## CONTEXT
+
+### Источник: Branch of Стратегический анализ и план продаж "Дождика" на 2025-2026 (блок 0, dist=0.261)
+USER: Смотри, у меня есть выгрузка в csv по продажам по дням (примерно за 09.01.2024-28.02.2025), выгрузка в csv по запросам по дням (за аналогичный период), общая сводка по товару в тхт, выгрузка в csv по всем отзывам и вопросам (за аналогичный период), и фотка самого товара в формате webp. и такая информация по каждому товару каждого из конкурентов (суммарно 2 папки с моими 2 товарами, и еще 6 папок с 6 товарами 4ех конкурентов). Мне нужно провести детальный анализ, но из-за объема я не хочу просто прикреплять каждый файлик (их суммарно 40 шт), вопрос в том как мне провести этот анализ? все документы лежат в гугл диске
+
+MODEL: **Examining Drive Access**
+
+I'm currently focused on how to analyze multiple files sourced from Google Drive, specifically using Google Colab. I'm exploring ways to establish a connection between Colab and Drive so I can readily access the files.
+
+
+======================================================================
+VALIDATION: checking for thought patterns in context...
+======================================================================
+⚠️  FAIL: Found thought markers in prompt: ["I'm currently", "I'm now", "I've been", "I'm focusing"]

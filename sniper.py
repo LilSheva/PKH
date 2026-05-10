@@ -176,6 +176,50 @@ class ContextSniper:
             "manifest_chats": len(self.manifest.chat_paths()),
         }
 
+    def reset(self, *, drop_manifest: bool = True, drop_all_collections: bool = False) -> dict:
+        """Wipe state so next ingest starts fresh.
+
+        Args:
+            drop_manifest: delete manifest.json (default True). Without this,
+                ingest would skip files that look unchanged.
+            drop_all_collections: if True, drop coll. for ALL registered models
+                (pkh_bge-m3, pkh_qwen3, pkh_e5-instruct, …). If False (default),
+                only the collection of the current model is dropped.
+
+        Returns:
+            dict with what was actually cleared.
+        """
+        cleared = {"collections": [], "manifest_deleted": False}
+
+        # 1. Drop Chroma collection(s)
+        if drop_all_collections:
+            for key in emb.REGISTRY:
+                name = emb.collection_name(key)
+                try:
+                    self.store.client.delete_collection(name)
+                    cleared["collections"].append(name)
+                except Exception:
+                    pass  # collection may not exist
+        else:
+            name = emb.collection_name(self.embedding_key)
+            try:
+                self.store.client.delete_collection(name)
+                cleared["collections"].append(name)
+            except Exception:
+                pass
+
+        # 2. Recreate store so current collection handle is fresh
+        self.store = VectorStore(self.db_dir, self.embedding_key)
+
+        # 3. Drop manifest file and in-memory state
+        if drop_manifest:
+            if self.manifest.path.exists():
+                self.manifest.path.unlink()
+                cleared["manifest_deleted"] = True
+            self.manifest.files = {}
+
+        return cleared
+
     def tag_chats(
         self,
         llm_call: LLMCall,
