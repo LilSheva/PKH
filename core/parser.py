@@ -119,6 +119,15 @@ def _filter_thought_smart(text: str, user_query: str, sim_threshold: float,
 def _process_model_chunks(model_chunks: list[dict], user_query: str,
                           mode: str, long_threshold: int, sim_threshold: float,
                           embedding_key: str) -> str:
+    """Extract model answer text from chunks.
+
+    THOUGHT_MODE controls what happens with isThought chunks:
+      OFF   — thoughts are discarded entirely.
+      ON    — thoughts are included as-is before the answer.
+      SMART — thoughts are discarded from stored text (like OFF), keeping only
+              the final answer. This keeps the vector DB clean while still
+              allowing future use of thoughts for auxiliary purposes.
+    """
     out: list[str] = []
     for ch in model_chunks:
         text = _chunk_text(ch)
@@ -128,18 +137,12 @@ def _process_model_chunks(model_chunks: list[dict], user_query: str,
         if not is_thought:
             out.append(text)
             continue
-        if mode == "OFF":
+        # Thoughts handling
+        if mode == "OFF" or mode == "SMART":
             continue
         if mode == "ON":
             out.append(text)
             continue
-        if mode == "SMART":
-            if len(text) <= long_threshold:
-                out.append(text)
-            else:
-                kept = _filter_thought_smart(text, user_query, sim_threshold, embedding_key)
-                if kept:
-                    out.append(kept)
     return "\n\n".join(out)
 
 

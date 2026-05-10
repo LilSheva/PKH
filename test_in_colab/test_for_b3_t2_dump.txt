@@ -1,0 +1,103 @@
+# Тест блока 3 v2 (super-prompt после фикса)
+# Проверяем:
+# - Thoughts НЕ попадают в контекст (нет "I'm currently...", "I've been...")
+# - Метаданные (chat_id, chunk_index, dist) видны в заголовке каждого блока
+# - Блоки с dist > 0.45 отсечены
+# - meta_query опционален (если не передан — ищет по main_prompt)
+# - save_super_prompt() создаёт .md файл
+
+# ============================================================
+# ВАЖНО: перед запуском нужно переингестить базу!
+# Удали старую коллекцию и прогони ингест заново:
+#
+#   sniper.store.client.delete_collection('pkh_bge-m3')
+#   sniper.store = VectorStore(config.DB_DIR, config.EMBEDDING_MODEL)
+#   sniper.ingest(config.CHATS_DIR)
+#
+# Это нужно один раз — чтобы блоки пересоздались без thoughts.
+# ============================================================
+
+from core.vector_db import VectorStore
+
+# --- Переингест (раскомментируй при первом запуске после обновления) ---
+# sniper.store.client.delete_collection('pkh_bge-m3')
+# sniper.store = VectorStore(config.DB_DIR, config.EMBEDDING_MODEL)
+# stats = sniper.ingest(config.CHATS_DIR)
+# print("Re-ingested:", stats)
+# print(sniper.stats())
+
+# --- Тесты ---
+
+tests = [
+    # 1. Прямое — SIEM (должен найти event_src чат, без thoughts)
+    {
+        "main_prompt": "Напиши шаблон ответа на инцидент с Kaspersky Endpoint Security.",
+        "meta_query": "инцидент Kaspersky event_src.ip event_src.asset MaxPatrol SIEM",
+    },
+    # 2. IoC — только финальный ответ модели
+    {
+        "main_prompt": "Напиши функцию на Python для извлечения IPv4, доменов и MD5 из текста.",
+        "meta_query": "regex IoC сигнатура парсинг индикаторов компрометации",
+    },
+    # 3. Без meta_query — поиск по main_prompt
+    {
+        "main_prompt": "фарм ферма CS2 100 аккаунтов окупаемость затраты",
+        "meta_query": None,
+    },
+    # 4. Edge case — нет релевантного контекста (dist > 0.45)
+    {
+        "main_prompt": "Объясни разницу между Docker и Kubernetes.",
+        "meta_query": "контейнеризация Docker Kubernetes оркестрация",
+    },
+    # 5. Продажи WB
+    {
+        "main_prompt": "Составь план A/B тестирования описаний товара на Wildberries.",
+        "meta_query": "анализ продаж конкурентов Wildberries описание товара",
+    },
+    # 6. Тест save_super_prompt — сохранение .md файла
+    {
+        "main_prompt": "Напиши инструкцию по настройке Google Colab для анализа данных.",
+        "meta_query": "Google Colab подключение Drive Python анализ файлов",
+        "save": True,
+    },
+]
+
+for i, t in enumerate(tests, 1):
+    print(f"\n{'='*70}")
+    print(f"TEST {i}")
+    print(f"main_prompt: {t['main_prompt']}")
+    print(f"meta_query:  {t.get('meta_query', '(используется main_prompt)')}")
+    print(f"{'='*70}")
+
+    if t.get("save"):
+        path = sniper.save_super_prompt(
+            main_prompt=t["main_prompt"],
+            meta_query=t.get("meta_query"),
+            top_k=3,
+        )
+        print(f"\n✓ Saved to: {path}")
+        print(f"--- File content (first 1000 chars) ---")
+        print(path.read_text(encoding='utf-8')[:1000])
+    else:
+        prompt = sniper.generate_super_prompt(
+            main_prompt=t["main_prompt"],
+            meta_query=t.get("meta_query"),
+            top_k=3,
+        )
+        print(f"\n--- FULL PROMPT (first 1200 chars) ---")
+        print(prompt[:1200])
+
+    print()
+
+# --- Проверка: thoughts отсутствуют ---
+print("\n" + "="*70)
+print("VALIDATION: checking for thought patterns in context...")
+print("="*70)
+thought_markers = ["I'm currently", "I'm now", "I've been", "I've just", "I'm focusing"]
+query = "event_src.ip и event_src.asset разница"
+prompt = sniper.generate_super_prompt(main_prompt=query, top_k=3)
+found = [m for m in thought_markers if m in prompt]
+if found:
+    print(f"⚠️  FAIL: Found thought markers in prompt: {found}")
+else:
+    print("✓ PASS: No thought markers found in generated prompt")

@@ -23,3 +23,6 @@ SEMANTIC_DEDUP_THRESHOLD = 0.97
 # Поиск
 DEFAULT_TOP_K = 8
 
+# Порог отсечения для super-prompt (cosine distance)
+MAX_CONTEXT_DIST = 0.45
+

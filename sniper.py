@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -8,6 +10,12 @@ from core import embeddings as emb, ingestion, parser
 from core.manifest import Manifest
 from core.tagger import LLMCall, TagResult, tag_chats
 from core.vector_db import VectorStore
+
+
+def _slugify(text: str) -> str:
+    """Simple slugify for filenames."""
+    text = re.sub(r"[^\w\s-]", "", text.lower())
+    return re.sub(r"[\s_]+", "-", text).strip("-")[:40]
 
 
 class ContextSniper:
@@ -113,13 +121,51 @@ class ContextSniper:
     def generate_super_prompt(
         self,
         main_prompt: str,
-        meta_query: str,
+        meta_query: Optional[str] = None,
         top_k: Optional[int] = None,
+        max_dist: Optional[float] = None,
     ) -> str:
-        res = self.search_context(meta_query, top_k=top_k)
+        query = meta_query or main_prompt
+        res = self.search_context(query, top_k=top_k)
+        threshold = max_dist or config.MAX_CONTEXT_DIST
+
         docs = res.get("documents", [[]])[0] if res.get("documents") else []
-        ctx = "\n\n---\n\n".join(docs)
-        return f"## CONTEXT\n{ctx}\n\n## TASK\n{main_prompt}"
+        metas = res.get("metadatas", [[]])[0] if res.get("metadatas") else []
+        dists = res.get("distances", [[]])[0] if res.get("distances") else []
+
+        # Build context blocks with metadata, filtering by distance
+        context_parts = []
+        for doc, meta, dist in zip(docs, metas, dists):
+            if dist > threshold:
+                continue
+            header = f"### Источник: {meta.get('chat_id', '?')} (блок {meta.get('chunk_index', '?')}, dist={dist:.3f})"
+            context_parts.append(f"{header}\n{doc}")
+
+        if not context_parts:
+            ctx = "_Релевантный контекст не найден (все результаты за порогом дистанции)._"
+        else:
+            ctx = "\n\n---\n\n".join(context_parts)
+
+        return f"## CONTEXT\n\n{ctx}\n\n## TASK\n\n{main_prompt}"
+
+    def save_super_prompt(
+        self,
+        main_prompt: str,
+        meta_query: Optional[str] = None,
+        top_k: Optional[int] = None,
+        max_dist: Optional[float] = None,
+        output_dir: Optional[Path] = None,
+    ) -> Path:
+        """Build super-prompt and save as .md file. Returns the file path."""
+        prompt = self.generate_super_prompt(main_prompt, meta_query, top_k, max_dist)
+        out = Path(output_dir) if output_dir else (self.db_dir / "prompts")
+        out.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now().strftime("%Y-%m-%d_%H%M")
+        slug = _slugify(main_prompt[:40])
+        filename = f"{ts}_{slug}.md"
+        path = out / filename
+        path.write_text(prompt, encoding="utf-8")
+        return path
 
     def stats(self) -> dict:
         return {

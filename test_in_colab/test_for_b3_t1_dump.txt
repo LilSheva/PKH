@@ -1,0 +1,293 @@
+# Тест блока 3 (super-prompt) — 10 кейсов
+# Проверяем: качество собранного контекста, читаемость промпта, релевантность подмешанных блоков.
+# Для каждого кейса — main_prompt (задача для LLM) + meta_query (по чему искать контекст).
+
+tests = [
+    # 1. Прямое использование — задача из области SIEM
+    {
+        "main_prompt": "Напиши шаблон ответа на инцидент с Kaspersky Endpoint Security: что проверить, кому писать, какие поля события смотреть.",
+        "meta_query": "инцидент Kaspersky event_src.ip event_src.asset MaxPatrol SIEM",
+    },
+    # 2. Прямое использование — IoC парсер
+    {
+        "main_prompt": "Напиши функцию на Python, которая извлекает все IPv4, домены и MD5-хеши из текста.",
+        "meta_query": "regex IoC сигнатура парсинг индикаторов компрометации из документов",
+    },
+    # 3. Прямое использование — скрипт статусов ПО
+    {
+        "main_prompt": "Добавь в скрипт статусов ПО поддержку нового формата: вендор указан через слеш вместо запятой.",
+        "meta_query": "fuzzy matching вендор продукт ППТС определение статуса",
+    },
+    # 4. Кросс-тематический — Python + Excel
+    {
+        "main_prompt": "Напиши скрипт, который читает xlsx с уязвимостями и csv с продажами, объединяет по ключу и выводит сводку.",
+        "meta_query": "pandas Excel CSV чтение таблиц обработка данных Python скрипт",
+    },
+    # 5. Стратегический — продажи
+    {
+        "main_prompt": "Составь план A/B тестирования описаний товара на Wildberries на основе моего предыдущего опыта.",
+        "meta_query": "анализ продаж конкурентов Wildberries описание товара ранжирование",
+    },
+    # 6. Креативный — игровые фермы
+    {
+        "main_prompt": "Напиши бизнес-план фермы на 200 аккаунтов: выбор игры, затраты, ROI, риски.",
+        "meta_query": "фарм ферма CS2 окупаемость аккаунты пассивный доход игры боты",
+    },
+    # 7. Мета-запрос — как я работал с Colab
+    {
+        "main_prompt": "Напиши инструкцию по настройке рабочей среды в Google Colab для анализа данных с Google Drive.",
+        "meta_query": "Google Colab подключение Drive монтирование Python анализ файлов",
+    },
+    # 8. Edge case — запрос без контекста в базе (должен дать слабый контекст)
+    {
+        "main_prompt": "Объясни разницу между Docker и Kubernetes простыми словами.",
+        "meta_query": "контейнеризация Docker Kubernetes оркестрация деплой",
+    },
+    # 9. Смешанный — безопасность + автоматизация
+    {
+        "main_prompt": "Напиши скрипт мониторинга: каждый час проверяет новые CVE по списку моего ПО и шлёт алерт в Telegram.",
+        "meta_query": "CVE уязвимости статус ПО автоматизация мониторинг скрипт Python",
+    },
+    # 10. Водяная марка — мультимодальный контекст
+    {
+        "main_prompt": "Напиши пошаговую инструкцию как убрать водяной знак с изображения в Python (Pillow или OpenCV).",
+        "meta_query": "удалить водяную марку фото изображение обработка",
+    },
+]
+
+for i, t in enumerate(tests, 1):
+    print(f"\n{'='*70}")
+    print(f"TEST {i}")
+    print(f"main_prompt: {t['main_prompt']}")
+    print(f"meta_query:  {t['meta_query']}")
+    print(f"{'='*70}")
+    prompt = sniper.generate_super_prompt(
+        main_prompt=t["main_prompt"],
+        meta_query=t["meta_query"],
+        top_k=3,
+    )
+    # Печатаем только первые 800 символов контекста + полный TASK
+    sections = prompt.split("## TASK")
+    ctx = sections[0].replace("## CONTEXT\n", "")
+    print(f"\n--- CONTEXT (first 800 chars) ---")
+    print(ctx[:800])
+    print(f"\n--- TASK ---")
+    print(f"## TASK{sections[1] if len(sections) > 1 else ''}")
+    print()
+
+---
+
+
+======================================================================
+TEST 1
+main_prompt: Напиши шаблон ответа на инцидент с Kaspersky Endpoint Security: что проверить, кому писать, какие поля события смотреть.
+meta_query:  инцидент Kaspersky event_src.ip event_src.asset MaxPatrol SIEM
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: event_src.ip и event_src.asset в чем разница в siem mp 10 в контексте сработки с kaspersky endpoint_security ?
+
+MODEL: I'm currently focused on the intricacies of MaxPatrol SIEM v10. My priority is to understand the precise meaning and application of the `event_src.ip` and `event_src.asset` fields.  Furthermore, I will be delving into how Kaspersky Endpoint Security data integrates within this system.
+
+I'm now zeroing in on how `event_src.ip` and `event_src.asset` are populated during an event trigger within MaxPatrol SIEM v10. My focus has sharpened, aiming to precisely explain their distinction and significance, especially concerning Kaspersky Endpoint Security integrations. The goal is to provide a clear and actionable explanation.
+
+**Analyzing MaxPatrol SIEM Fields**
+
+I've been d
+
+--- TASK ---
+## TASK
+Напиши шаблон ответа на инцидент с Kaspersky Endpoint Security: что проверить, кому писать, какие поля события смотреть.
+
+
+======================================================================
+TEST 2
+main_prompt: Напиши функцию на Python, которая извлекает все IPv4, домены и MD5-хеши из текста.
+meta_query:  regex IoC сигнатура парсинг индикаторов компрометации из документов
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: "парсер индикаторов компрометации (іос) по сигнатурному анализу с учетом структурных особенностей" вот так можно? Или структ особенности уже лишнее?
+
+MODEL: **Analyzing the Query's Focus**
+
+I'm currently dissecting the user's query, focusing on its core components. The key terms are "parser", "indicators of compromise (IOCs)", "signature analysis," and "structural features." I'm determining the relationships between these terms to understand the desired functionality and scope of the requested tool. This is laying the foundation for a relevant and accurate tool.
+
+**Refining the Phrasing**
+
+I'm now refining the proposed phrase, carefully balancing precision and clarity. My focus is on the Russian terminology, specifically. "Сигнатурный анализ" in the provided context felt clunky, so I
+
+--- TASK ---
+## TASK
+Напиши функцию на Python, которая извлекает все IPv4, домены и MD5-хеши из текста.
+
+
+======================================================================
+TEST 3
+main_prompt: Добавь в скрипт статусов ПО поддержку нового формата: вендор указан через слеш вместо запятой.
+meta_query:  fuzzy matching вендор продукт ППТС определение статуса
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: Сделать скрипт для определения статуса ПО по пптсу
+
+Концепция:
+написать скрипт для определения статуса и id ПО из таблицы с уязвимостями, формировать 2 таблицы (или 2 листа внутри 1 таблицы) где будет 1 - заполненая по образцу информация по всем представленным уязвимостям и 2 - дополнительная таблица с индексами совпадения (с пояснением: 0 - совпадение в среди ППТС, 1 - совпадение только вендора/названия на < 50%, 2 - совпадение только вендора/названия на >= 50%, 3 - совпадение и вендора и названия на [< 50% и < 50%] соотв, 4 - совпадение и вендора и названия на [< 50% и >= 50%] (или [>= 50% и < 50%]) соотв, 5 - совпадение и вендора и названия на [>= 50% и >= 50%] соотв) то есть формат искомое значение выделенное (CVE, CVSS, продукт) а под ним не выделенным и с нумерацией вариантов д
+
+--- TASK ---
+## TASK
+Добавь в скрипт статусов ПО поддержку нового формата: вендор указан через слеш вместо запятой.
+
+
+======================================================================
+TEST 4
+main_prompt: Напиши скрипт, который читает xlsx с уязвимостями и csv с продажами, объединяет по ключу и выводит сводку.
+meta_query:  pandas Excel CSV чтение таблиц обработка данных Python скрипт
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: C:\Users\yakov\AppData\Local\Programs\Python\Python312\python.exe C:\Users\yakov\PycharmProjects\test4\status.py 
+Произошла непредвиденная ошибка: "None of [Index(['ID_PPTS', 'Product_PPTS', 'Vendor_PPTS'], dtype='object')] are in the [columns]"
+
+Process finished with exit code 0
+
+Давай без привязки к названию в загаловке
+
+MODEL: I've carefully examined the user's error report. It seems they're encountering an issue while executing a Python script via the standard interpreter. The details are a bit sparse right now, with only part of the error message present. I need to dig deeper. I'm focusing on trying to understand the root cause of the problem from this initial information.
+
+I'm now fully immersed in understanding the specifics of the Python script's failure, focusing on the erro
+
+--- TASK ---
+## TASK
+Напиши скрипт, который читает xlsx с уязвимостями и csv с продажами, объединяет по ключу и выводит сводку.
+
+
+======================================================================
+TEST 5
+main_prompt: Составь план A/B тестирования описаний товара на Wildberries на основе моего предыдущего опыта.
+meta_query:  анализ продаж конкурентов Wildberries описание товара ранжирование
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: 
+
+MODEL: Отлично, спасибо за предоставленный план. Это уже не просто таблица, а полноценная стратегия с четко прописанными этапами. Я проанализировал ее в контексте предоставленных ранее данных о рынке и конкурентах.
+
+В целом, **ваш план — очень хороший, амбициозный и профессионально структурирован.** Вы правильно определили ключевые этапы сезона и рычаги воздействия (цена, маркетинг). Моя задача — оценить его реалистичность и дать рекомендации по усилению.
+
+### **Оценка плана продаж: Сильные и слабые стороны**
+
+#### **Сильные стороны:**
+
+1.  **Этапность и логика:** Вы абсолютно правильно разбили сезон на фазы: "Разгон" -> "Использование распродаж" -> "Сбор прибыли" -> "Ликвидация". Это профессиональный подход.
+2.  **Гибкость ценообразования:** Вы не держите одну цену, а управляете е
+
+--- TASK ---
+## TASK
+Составь план A/B тестирования описаний товара на Wildberries на основе моего предыдущего опыта.
+
+
+======================================================================
+TEST 6
+main_prompt: Напиши бизнес-план фермы на 200 аккаунтов: выбор игры, затраты, ROI, риски.
+meta_query:  фарм ферма CS2 окупаемость аккаунты пассивный доход игры боты
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: Я знаю что есть фарм фермы в кс2, где на условных 100 аккаунтах (либо специальной панелью, либо около ручным способом) выбивается еженедельный дроп, я посчитал и примерно ферма на 100 аккаунтов (с учётом покупки оптимального пк под нее) будет стоить 300-350к рублей. Так вот, сам вопрос в том какие ещё есть актуальные игры где можно автоматизированно фармить и при этом хорошо зарабатывать, давай составим топ 5 или 10 (в зависимости от того насколько их много) актуальных и самых прибыльных ферм, а также для каждой условно напиши минимальный и потенциальный доход в месяц, а также обязательные затраты на ее настройку в контексте данной игры (ибо прайс в КС2 платный)
+
+MODEL: **Analyzing the Farm's Setup**
+
+I'm currently focused on dissecting the user's setup, particularly the financial as
+
+--- TASK ---
+## TASK
+Напиши бизнес-план фермы на 200 аккаунтов: выбор игры, затраты, ROI, риски.
+
+
+======================================================================
+TEST 7
+main_prompt: Напиши инструкцию по настройке рабочей среды в Google Colab для анализа данных с Google Drive.
+meta_query:  Google Colab подключение Drive монтирование Python анализ файлов
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: Смотри, у меня есть выгрузка в csv по продажам по дням (примерно за 09.01.2024-28.02.2025), выгрузка в csv по запросам по дням (за аналогичный период), общая сводка по товару в тхт, выгрузка в csv по всем отзывам и вопросам (за аналогичный период), и фотка самого товара в формате webp. и такая информация по каждому товару каждого из конкурентов (суммарно 2 папки с моими 2 товарами, и еще 6 папок с 6 товарами 4ех конкурентов). Мне нужно провести детальный анализ, но из-за объема я не хочу просто прикреплять каждый файлик (их суммарно 40 шт), вопрос в том как мне провести этот анализ? все документы лежат в гугл диске
+
+MODEL: **Examining Drive Access**
+
+I'm currently focused on how to analyze multiple files sourced from Google Drive, specifically using Google Colab. I'm exploring ways t
+
+--- TASK ---
+## TASK
+Напиши инструкцию по настройке рабочей среды в Google Colab для анализа данных с Google Drive.
+
+
+======================================================================
+TEST 8
+main_prompt: Объясни разницу между Docker и Kubernetes простыми словами.
+meta_query:  контейнеризация Docker Kubernetes оркестрация деплой
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: Давай сделаем это в гугл колаб
+
+MODEL: **Considering the Challenge**
+
+**Structuring the Colab Guide**
+
+I've got the overall structure for the Colab guide now. I'm focusing on making it accessible and easy to follow. Breaking it into setup, code implementation (integrating and explaining the Python script I wrote earlier), and execution, seems the most logical. Clarity is paramount, especially for users who might not be developers.
+
+**Defining the Workflow**
+
+I'm now detailing the full workflow, starting from the raw CSV data and finishing with the analysis. This involves adapting my Python script for Colab, breaking it down into a clear setup, execution, and analysis phases. The goal is to make it user-friendly, especially for non-developers, with precise instructions on accessing Go
+
+--- TASK ---
+## TASK
+Объясни разницу между Docker и Kubernetes простыми словами.
+
+
+======================================================================
+TEST 9
+main_prompt: Напиши скрипт мониторинга: каждый час проверяет новые CVE по списку моего ПО и шлёт алерт в Telegram.
+meta_query:  CVE уязвимости статус ПО автоматизация мониторинг скрипт Python
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: Сделать скрипт для определения статуса ПО по пптсу
+
+Концепция:
+написать скрипт для определения статуса и id ПО из таблицы с уязвимостями, формировать 2 таблицы (или 2 листа внутри 1 таблицы) где будет 1 - заполненая по образцу информация по всем представленным уязвимостям и 2 - дополнительная таблица с индексами совпадения (с пояснением: 0 - совпадение в среди ППТС, 1 - совпадение только вендора/названия на < 50%, 2 - совпадение только вендора/названия на >= 50%, 3 - совпадение и вендора и названия на [< 50% и < 50%] соотв, 4 - совпадение и вендора и названия на [< 50% и >= 50%] (или [>= 50% и < 50%]) соотв, 5 - совпадение и вендора и названия на [>= 50% и >= 50%] соотв) то есть формат искомое значение выделенное (CVE, CVSS, продукт) а под ним не выделенным и с нумерацией вариантов д
+
+--- TASK ---
+## TASK
+Напиши скрипт мониторинга: каждый час проверяет новые CVE по списку моего ПО и шлёт алерт в Telegram.
+
+
+======================================================================
+TEST 10
+main_prompt: Напиши пошаговую инструкцию как убрать водяной знак с изображения в Python (Pillow или OpenCV).
+meta_query:  удалить водяную марку фото изображение обработка
+======================================================================
+
+--- CONTEXT (first 800 chars) ---
+USER: расширь изображение и удали старую вотермаку
+
+MODEL: Конечно, вот расширенное изображение без водяного знака:
+
+---
+
+USER: выглядит не очень, убери зеленый цвет и сделай более интегрированно дождик, сейчас выглядит как будто это вырезали и вставили поверх в плохом редакторе, я знаю ты можешь лучше
+
+MODEL: Вы абсолютно правы, и я приношу свои извинения за предыдущий результат. Я постарался сделать это изображение гораздо более органичным, интегрировав дождик и избавившись от зеленого цвета. Надеюсь, этот вариант вам понравится больше!
+
+---
+
+USER: Есть 1 нюанс, для 3его слайда у меня есть только фото с пучком в руке, для действий распушить и набрасывать свободно у меня нет фоток. Как быть?
+
+MODEL: Отличный практический вопрос! Это абсолютно нормальная ситуация. Не нужно срочно организов
+
+--- TASK ---
+## TASK
+Напиши пошаговую инструкцию как убрать водяной знак с изображения в Python (Pillow или OpenCV).
+
