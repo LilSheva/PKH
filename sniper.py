@@ -12,10 +12,10 @@ from core.tagger import LLMCall, TagResult, tag_chats
 from core.vector_db import VectorStore
 
 
-def _slugify(text: str) -> str:
+def _slugify(text: str, max_len: int = 40) -> str:
     """Simple slugify for filenames."""
     text = re.sub(r"[^\w\s-]", "", text.lower())
-    return re.sub(r"[\s_]+", "-", text).strip("-")[:40]
+    return re.sub(r"[\s_]+", "-", text).strip("-")[:max_len]
 
 
 class ContextSniper:
@@ -33,7 +33,7 @@ class ContextSniper:
         self.store = VectorStore(self.db_dir, self.embedding_key)
         self.manifest = Manifest(manifest_path or config.MANIFEST_PATH)
 
-    def ingest(self, root: str | Path) -> dict:
+    def ingest(self, root: str | Path, *, show_progress: bool = True) -> dict:
         root = Path(root)
         stats = {
             "files_seen": 0,
@@ -45,8 +45,24 @@ class ContextSniper:
             "blocks_skipped_dupe_content": 0,
         }
 
-        for path in ingestion.iter_files(root):
+        # Materialize the file list so tqdm can show total count
+        all_paths = list(ingestion.iter_files(root))
+
+        pbar = None
+        if show_progress:
+            try:
+                from tqdm.auto import tqdm
+                pbar = tqdm(all_paths, desc="ingesting", unit="file")
+                iterator = pbar
+            except ImportError:
+                iterator = all_paths
+        else:
+            iterator = all_paths
+
+        for path in iterator:
             stats["files_seen"] += 1
+            if pbar is not None:
+                pbar.set_postfix(ingested=stats["files_ingested"], blocks=stats["blocks_added"], refresh=False)
             spath = str(path)
             try:
                 st = path.stat()
@@ -156,13 +172,24 @@ class ContextSniper:
         max_dist: Optional[float] = None,
         output_dir: Optional[Path] = None,
     ) -> Path:
-        """Build super-prompt and save as .md file. Returns the file path."""
+        """Build super-prompt and save as .md file. Returns the file path.
+
+        Filename format: {HHMM-DDMMYY}_{main_prompt[:20]}_{meta_query[:10]}_prompt.md
+        Slugs are omitted if the corresponding value is empty.
+        """
         prompt = self.generate_super_prompt(main_prompt, meta_query, top_k, max_dist)
         out = Path(output_dir) if output_dir else (self.db_dir / "prompts")
         out.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now().strftime("%Y-%m-%d_%H%M")
-        slug = _slugify(main_prompt[:40])
-        filename = f"{ts}_{slug}.md"
+        ts = datetime.now().strftime("%H%M-%d%m%y")
+        parts = [ts]
+        main_slug = _slugify(main_prompt, max_len=20) if main_prompt else ""
+        if main_slug:
+            parts.append(main_slug)
+        meta_slug = _slugify(meta_query, max_len=10) if meta_query else ""
+        if meta_slug:
+            parts.append(meta_slug)
+        parts.append("prompt")
+        filename = "_".join(parts) + ".md"
         path = out / filename
         path.write_text(prompt, encoding="utf-8")
         return path
